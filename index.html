@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>مجمع احمد فرحان المتميز</title>
+    <title>محل تبارك الرحمن البيع البذور</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,7 +13,7 @@
     <datalist id="inventory-options"></datalist>
 
     <header>
-        <h1>مجمع احمد فرحان المتميز</h1>
+        <h1>محل تبارك الرحمن البيع البذور</h1>
     </header>
 
     <main id="app-content">
@@ -221,7 +221,7 @@
     <div id="install-modal" class="modal">
         <div class="modal-content" style="text-align: center;">
             <h3 style="margin-bottom: 15px;">تثبيت التطبيق</h3>
-            <p style="margin-bottom: 20px;">هل تريد تثبيت تطبيق "مجمع احمد فرحان المتميز" للعمل بدون إنترنت؟</p>
+            <p style="margin-bottom: 20px;">هل تريد تثبيت تطبيق "سجل العام" للعمل بدون إنترنت؟</p>
             <div class="modal-actions">
                 <button class="btn-success" onclick="window.installApp()">تثبيت</button>
                 <button class="btn-danger" onclick="closeModal('install-modal')">لاحقاً</button>
@@ -231,16 +231,16 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+        import { getAuth, signInWithRedirect, getRedirectResult, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBjmadQFZLO6IY7cFO51YdVGCWuf-sYh7w",
-            authDomain: "hbkjhkj-29c33.firebaseapp.com",
-            projectId: "hbkjhkj-29c33",
-            storageBucket: "hbkjhkj-29c33.firebasestorage.app",
-            messagingSenderId: "922662791106",
-            appId: "1:922662791106:web:626b733755a17fdbb7585b"
+            apiKey: "AIzaSyAXZDaCDWOU3ZH_5os7KIALvzm9BLyJTVM",
+            authDomain: "rtrl-46c32.firebaseapp.com",
+            projectId: "rtrl-46c32",
+            storageBucket: "rtrl-46c32.firebasestorage.app",
+            messagingSenderId: "821990404266",
+            appId: "1:821990404266:web:c35c3e3ea6c2cf088560d3"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -278,12 +278,22 @@
             }
         };
 
-        window.signInWithGoogle = () => {
-            signInWithPopup(auth, provider).then((result) => {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
                 document.getElementById('google-login-section').style.display = 'none';
                 document.getElementById('pin-section').style.display = 'block';
-            }).catch((error) => {
+            }
+        });
+
+        getRedirectResult(auth).catch((error) => {
+            if (error && error.code !== 'auth/redirect-cancelled-by-user') {
                 alert("خطأ في تسجيل الدخول: " + error.message);
+            }
+        });
+
+        window.signInWithGoogle = () => {
+            signInWithRedirect(auth, provider).catch((error) => {
+                alert("خطأ في التوجيه: " + error.message);
             });
         };
 
