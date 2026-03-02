@@ -248,6 +248,36 @@
         const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
 
+        window.syncDataToFirebase = async () => {
+            if(navigator.onLine) {
+                try {
+                    const dataToSync = {
+                        inventory: JSON.parse(localStorage.getItem('inventory')) || [],
+                        customers: JSON.parse(localStorage.getItem('customers')) || [],
+                        directSales: JSON.parse(localStorage.getItem('directSales')) || [],
+                        statistics: JSON.parse(localStorage.getItem('statistics')) || []
+                    };
+                    await setDoc(doc(db, "appData", "main"), dataToSync);
+                } catch(e) { console.error("Error syncing:", e); }
+            }
+        };
+
+        window.syncDataFromFirebase = async () => {
+            if(navigator.onLine) {
+                try {
+                    const docSnap = await getDoc(doc(db, "appData", "main"));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if(data.inventory && data.inventory.length > 0) localStorage.setItem('inventory', JSON.stringify(data.inventory));
+                        if(data.customers && data.customers.length > 0) localStorage.setItem('customers', JSON.stringify(data.customers));
+                        if(data.directSales && data.directSales.length > 0) localStorage.setItem('directSales', JSON.stringify(data.directSales));
+                        if(data.statistics && data.statistics.length > 0) localStorage.setItem('statistics', JSON.stringify(data.statistics));
+                        window.location.reload();
+                    }
+                } catch(e) { console.error("Error fetching:", e); }
+            }
+        };
+
         window.signInWithGoogle = () => {
             signInWithPopup(auth, provider).then((result) => {
                 document.getElementById('google-login-section').style.display = 'none';
@@ -260,38 +290,9 @@
         window.verifyPin = () => {
             const pin = document.getElementById('pin-input').value;
             if (pin === "1001") {
+                localStorage.setItem('isLoggedIn', 'true');
                 document.getElementById('login-modal').style.display = 'none';
                 
-                window.syncDataToFirebase = async () => {
-                    if(navigator.onLine) {
-                        try {
-                            const dataToSync = {
-                                inventory: JSON.parse(localStorage.getItem('inventory')) || [],
-                                customers: JSON.parse(localStorage.getItem('customers')) || [],
-                                directSales: JSON.parse(localStorage.getItem('directSales')) || [],
-                                statistics: JSON.parse(localStorage.getItem('statistics')) || []
-                            };
-                            await setDoc(doc(db, "appData", "main"), dataToSync);
-                        } catch(e) { console.error("Error syncing:", e); }
-                    }
-                };
-
-                window.syncDataFromFirebase = async () => {
-                    if(navigator.onLine) {
-                        try {
-                            const docSnap = await getDoc(doc(db, "appData", "main"));
-                            if (docSnap.exists()) {
-                                const data = docSnap.data();
-                                if(data.inventory && data.inventory.length > 0) localStorage.setItem('inventory', JSON.stringify(data.inventory));
-                                if(data.customers && data.customers.length > 0) localStorage.setItem('customers', JSON.stringify(data.customers));
-                                if(data.directSales && data.directSales.length > 0) localStorage.setItem('directSales', JSON.stringify(data.directSales));
-                                if(data.statistics && data.statistics.length > 0) localStorage.setItem('statistics', JSON.stringify(data.statistics));
-                                window.location.reload();
-                            }
-                        } catch(e) { console.error("Error fetching:", e); }
-                    }
-                };
-
                 if(!localStorage.getItem('inventory') && navigator.onLine) {
                     window.syncDataFromFirebase();
                 } else {
@@ -305,6 +306,15 @@
                 alert("رمز غير صحيح");
             }
         };
+
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            document.getElementById('login-modal').style.display = 'none';
+            if(!localStorage.getItem('inventory') && navigator.onLine) {
+                window.syncDataFromFirebase();
+            } else {
+                window.syncDataToFirebase();
+            }
+        }
 
         window.addEventListener('online', () => {
             if (window.syncDataToFirebase && document.getElementById('login-modal').style.display === 'none') {
