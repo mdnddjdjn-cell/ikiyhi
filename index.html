@@ -231,7 +231,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-        import { getAuth, signInWithRedirect, getRedirectResult, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -285,15 +285,11 @@
             }
         });
 
-        getRedirectResult(auth).catch((error) => {
-            if (error && error.code !== 'auth/redirect-cancelled-by-user') {
-                alert("خطأ في تسجيل الدخول: " + error.message);
-            }
-        });
-
         window.signInWithGoogle = () => {
-            signInWithRedirect(auth, provider).catch((error) => {
-                alert("خطأ في التوجيه: " + error.message);
+            signInWithPopup(auth, provider).then((result) => {
+                console.log("تم تسجيل الدخول بنجاح");
+            }).catch((error) => {
+                alert("خطأ في تسجيل الدخول: " + error.message);
             });
         };
 
